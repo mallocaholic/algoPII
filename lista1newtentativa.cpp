@@ -41,30 +41,49 @@ class Item{
             newItem->T = headQueue->next->T;
             newItem->next = NULL;
 
-            if(aux != NULL){
-                if(aux != pScheduler && pScheduler->next != NULL){ // ! CASO O ITEM ESTEJA NO MEIO DA LISTA DO PROC
+            if(pScheduler->next == NULL){ // END
+                newItem->next = pScheduler;
+                pScheduler = newItem;
+            } else {
+                if(pScheduler == this->next){
+                    newItem->next = this->next;
+                    this->next = newItem;
+                    pScheduler = newItem;
+                } else {
                     while(aux->next != pScheduler)
                         aux = aux->next;
-                    newItem->next = aux->next;
-                    aux->next = pScheduler;
-                    pScheduler = newItem;
-                } 
-                else if (aux == pScheduler && pScheduler->next != NULL){ // ! CASO O ITEM ESTEJA NO COMEÇO DO PROC
-                    while(aux->next != NULL)
-                        aux = aux->next;
                     aux->next = newItem;
+                    newItem->next = pScheduler;
+                    pScheduler = newItem;
                 }
-                else {
-                    newItem->next = aux;
-                    this->next = newItem;
-                }
-            } else this->next = newItem; // ! CASO NAO TENHA ITEM NA LISTA DO PROC
+            }
 
             if(headQueue->next->next != NULL) headQueue->next = headQueue->next->next; // * Limpando o item da QUEUE
             else headQueue->next = NULL;
             
             return headQueue->next;
         };
+
+};
+
+class Pilha{
+    public:
+    int size;
+    Item *topo;
+
+    void push(Item *headProc, Item *pScheduler){
+        //Primeiro vamos remover o objeto do PROC
+        Item *before_pScheduler = headProc->next;
+        while(before_pScheduler->next != pScheduler)
+            before_pScheduler = before_pScheduler->next;
+        if(pScheduler->next != NULL && before_pScheduler->next != NULL){ // ! Se tivermos que tirar um elemento no meio da lista
+            before_pScheduler->next = pScheduler->next;
+        } else if(pScheduler->next != NULL && before_pScheduler->next == NULL){ // ! Se tivermos que tirar um elemento do começo da lista
+            headProc->next = pScheduler->next;
+        } else { // ! Se tivermos que tirar um elemento do fim da lista
+            before_pScheduler->next = NULL;
+        }
+    }
 
 };
 
@@ -80,6 +99,10 @@ int main(){
          *pProc = NULL,
          *headQueue = NULL,
          *pScheduler= NULL;
+
+    Pilha pilha; 
+    pilha.size = 0;
+    pilha.topo = NULL;
 
     headProc = new Item;
     headProc->next = NULL;
@@ -100,7 +123,7 @@ int main(){
         // ! PROC
         }else if( !action.compare(processing) ){
             // * 1. Verifica se tem item processado em pSchedule e manda pra pilha.
-            
+            if(headProc->next != NULL && pScheduler->T == 0) pilha.push(headProc, pScheduler);
             // * 2. Verifica se tem item na QUEUE e coloca na lista  PROC
             if(headQueue->next != NULL) headQueue->next = headProc->toProcessor(pProc, pScheduler, headQueue);
             flagQueue = 1;
