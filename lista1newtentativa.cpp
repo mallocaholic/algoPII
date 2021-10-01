@@ -13,6 +13,49 @@ class Item{
         int T; //Tempo de processamento
         Item *next;
 
+        void cycle(){
+            int i = 0;
+            Item *tail = this->next; 
+            Item *temp = this->next;
+
+            while( tail->next != NULL){
+                tail = tail->next;
+                i++;
+            }
+
+            if( i > 1 ){
+                this->next = temp->next;
+                tail->next = temp;
+                temp->next = NULL;
+            }
+        };
+        
+        void toProcessor(Item *headProc){
+            
+            Item *newItem;
+            Item *temp = this->next;
+            Item *tail = headProc->next;
+            
+            newItem = new Item;
+            newItem->T = this->next->T;
+            newItem->X = this->next->X;
+            newItem->next = NULL;
+            //Colocando a queue pra frente
+            if(temp->next != NULL)
+            this->next = this->next->next;
+            else this->next = NULL;
+            delete temp;
+            
+            // Adicionando o novo item ao processador
+            if(tail == NULL) headProc->next = newItem;
+            else
+            { 
+                while(tail->next != NULL)
+                    tail = tail->next;
+                tail->next = newItem;
+            }
+        };
+
         void toQueue(int idenItem, int procTimeItem){
             Item *newItem;
             newItem = new Item; // * Criando o novo item
@@ -30,46 +73,7 @@ class Item{
                 pointer->next = newItem; // * Adicionando o novo item a lista
             }
         };
-
-        
-
-        Item *toProcessor(Item *pProc, Item **pScheduler, Item *headQueue){ // ? Retorna o headQueue sem o item que foi para o processador
-            
-            Item *aux = this->next;
-
-            Item *newItem;
-            newItem = new Item; // * Criando o novo item
-            newItem->X = headQueue->next->X;
-            newItem->T = headQueue->next->T;
-            newItem->next = NULL;
-
-            if(this->next != NULL)
-            if((*pScheduler) == this->next){
-                
-                newItem->next = this->next;
-                this->next = newItem;
-
-            } else if((*pScheduler)->next == NULL){
-
-                (*pScheduler)->next = newItem;
-                (*pScheduler) = newItem;
-
-            } else {
-                
-                while(aux->next != (*pScheduler))
-                    aux = aux->next;
-                aux->next = newItem;
-                newItem->next = (*pScheduler);
-                (*pScheduler) = newItem;
-
-            } else this->next = newItem;
-
-            if(headQueue->next->next != NULL) headQueue->next = headQueue->next->next; // * Limpando o item da QUEUE
-            else headQueue->next = NULL;
-            
-            return headQueue->next;
-        };
-
+    
 };
 
 class Pilha{
@@ -79,41 +83,7 @@ class Pilha{
 
     void push(Item **headProc, Item **pScheduler){
 
-        Item *b4_pScheduler = (*headProc)->next;
-        //Primeiro vamos remover o objeto do PROC
-        
-        if((*pScheduler) == (*headProc)->next && (*headProc)->next->next == NULL){
-
-            (*headProc)->next = NULL;   
-            (*pScheduler) = NULL;   
-
-        } else if((*pScheduler) == (*headProc)->next && (*headProc)->next->next != NULL){
-
-            (*headProc)->next = (*headProc)->next->next;
-            (*pScheduler) = (*headProc)->next->next;
-
-        } else if((*pScheduler)->next == NULL){
-            
-            while(b4_pScheduler->next != (*pScheduler))
-                b4_pScheduler = b4_pScheduler->next;
-            b4_pScheduler->next = NULL;
-            (*pScheduler) = b4_pScheduler; 
-
-        } else {    
-
-            while(b4_pScheduler->next != (*pScheduler))
-                b4_pScheduler = b4_pScheduler->next;
-            
-            b4_pScheduler->next = b4_pScheduler->next->next;
-            (*pScheduler) = b4_pScheduler->next; 
-
-
-        }
-        
-
-
     }
-
 };
 
 int main(){
@@ -125,9 +95,8 @@ int main(){
     string action = "";
 
     Item *headProc = NULL,
-         *pProc = NULL,
          *headQueue = NULL,
-         *pScheduler= NULL;
+         *tail;
 
     Pilha pilha; 
     pilha.size = 0;
@@ -149,32 +118,21 @@ int main(){
             headQueue->toQueue(idenItem, procTimeItem);
         // ! UNLD
         }else if( !action.compare(unload) ){
+
         // ! PROC
         }else if( !action.compare(processing) ){
-            // * 1. Verifica se tem item processado em pSchedule e manda pra pilha.
-            if(headProc->next != NULL && pScheduler->T == 0) pilha.push(&headProc, &pScheduler);
-            // * 2. Verifica se tem item na QUEUE e coloca na lista  PROC
-            if(headQueue->next != NULL) headQueue->next = headProc->toProcessor(pProc, &pScheduler, headQueue);
-            flagQueue = 1;
-        
+            // * 1. Verifica se tem item processado em tail
+            // * 2. Verifica se tem item na QUEUE e coloca em tail
+            if(headQueue->next != NULL) headQueue->toProcessor(headProc);
             if(headProc->next != NULL){
-                if(pProc == NULL) pProc = headProc->next;
-                
                 // * Trabalha no item
-                if(pProc->T != 0) pProc->T-=procTime;
-                if(pProc->T < 0 ) pProc->T = 0;
-                cout << processing << " " << pProc->X << " " << pProc->T << endl;
-                
-                // * Passa o ponteiro do processador
-                Item *temp = headProc->next;
-                while(temp != pProc)
-                    temp = temp->next;
-                pScheduler = temp;    
-
-                if(pProc->next != NULL) pProc = pProc->next;
-                else pProc = headProc->next;
-            
+                if(headProc->next->T - procTime > 0) headProc->next->T-=procTime;
+                else headProc->next->T = 0;
+                // *
+                cout << 
             } else if (flagQueue == 1) cout << "PROC -1 -1" << endl;
+            
+            headProc->cycle(); //RODA
         }
         cin >> action;
     }    
