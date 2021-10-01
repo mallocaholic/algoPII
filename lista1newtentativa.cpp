@@ -22,8 +22,8 @@ class Item{
                 tail = tail->next;
                 i++;
             }
-
-            if( i > 1 ){
+\
+            if( i > 0 ){
                 this->next = temp->next;
                 tail->next = temp;
                 temp->next = NULL;
@@ -81,8 +81,16 @@ class Pilha{
     int size;
     Item *topo;
 
-    void push(Item **headProc, Item **pScheduler){
+    void push(Item *tail){
+        
+        Item *newItem;
+        newItem = new Item;
+        newItem->X = tail->X;
+        newItem->T = tail->T
 
+        //while(){
+
+        //}
     }
 };
 
@@ -121,7 +129,10 @@ int main(){
 
         // ! PROC
         }else if( !action.compare(processing) ){
+            tail = headProc->next;
+            if(tail->next != NULL ) while(tail->next != NULL) tail = tail->next;
             // * 1. Verifica se tem item processado em tail
+            if(tail->T = 0) pilha.push(tail);
             // * 2. Verifica se tem item na QUEUE e coloca em tail
             if(headQueue->next != NULL) headQueue->toProcessor(headProc);
             if(headProc->next != NULL){
@@ -129,7 +140,7 @@ int main(){
                 if(headProc->next->T - procTime > 0) headProc->next->T-=procTime;
                 else headProc->next->T = 0;
                 // *
-                cout << 
+                cout << "PROC " << headProc->next->X << " " << headProc->next->T << endl;
             } else if (flagQueue == 1) cout << "PROC -1 -1" << endl;
             
             headProc->cycle(); //RODA
