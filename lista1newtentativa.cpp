@@ -12,12 +12,12 @@ class Item{
         int X; //Identificador (0,1,2 etc)
         int T; //Tempo de processamento
         Item *next;
-        
-        Item(int T, int X){
-            this->X = X;
-            this->T = T;
-            this->next = NULL;
-        };
+
+        // Item(int X, int T){
+        //     this->X = X;
+        //     this->T = T;
+        //     this->next = NULL;
+        // }
 
         void cycle(){
             int i = 0;
@@ -37,14 +37,14 @@ class Item{
         
         void toProcessor(Item *headProc){
             
-            //Item *newItem;
+            Item *newItem;
             Item *temp = this->next;
             Item *tail = headProc->next;
             
-            Item *newItem = new Item(this->next->T, this->next->X);
-            // newItem->T = this->next->T;
-            // newItem->X = this->next->X;
-            // newItem->next = NULL;
+            newItem = new Item;
+            newItem->T = this->next->T;
+            newItem->X = this->next->X;
+            newItem->next = NULL;
             //Colocando a queue pra frente
             if(temp->next != NULL)
             this->next = this->next->next;
@@ -63,10 +63,10 @@ class Item{
 
         void toQueue(int idenItem, int procTimeItem){
             Item *newItem;
-            newItem = new Item(idenItem, procTimeItem); // * Criando o novo item
-            // newItem->X = idenItem;
-            // newItem->T = procTimeItem;
-            // newItem->next = NULL;
+            newItem = new Item; // * Criando o novo item
+            newItem->X = idenItem;
+            newItem->T = procTimeItem;
+            newItem->next = NULL;
 
             if(this->next == NULL) this->next = newItem; // * Se a lista está vazia, retorna o novo elemento.
             else {
@@ -88,10 +88,10 @@ class Pilha{
 
     void push(Item *tail){
         
-        //Item *newItem;
-        //newItem = new Item(tail->X, tail->T, NULL);
-        // newItem->X = tail->X;
-        // newItem->T = tail->T; 
+        Item *newItem;
+        newItem = new Item;
+        newItem->X = tail->X;
+        newItem->T = tail->T; 
         //while(){
 
         //}
@@ -106,18 +106,18 @@ int main(){
 
     string action = "";
 
-    Item *headProc = new Item(0, 0),
-         *headQueue = new Item(0, 0),
-         *tail = headProc->next;
+    Item *headProc = NULL,
+         *headQueue = NULL,
+         *tail;
 
     Pilha pilha; 
     pilha.size = 0;
     pilha.topo = NULL;
 
-    //headProc = new Item(0, 0);
-    // headProc->next = NULL;
-    //headQueue = new Item(0, 0);
-    // headQueue->next = NULL;
+    headProc = new Item;
+    headProc->next = NULL;
+    headQueue = new Item;
+    headQueue->next = NULL;
 
     //Recebendo input
     cin >> procTime;
@@ -134,10 +134,10 @@ int main(){
         // ! PROC
         }else if( !action.compare(processing) ){
             tail = headProc->next;
-            if(headProc->next != NULL){ 
+            if(headProc->next != NULL){
                 if(tail->next != NULL ) while(tail->next != NULL) tail = tail->next;
             // * 1. Verifica se tem item processado em tail
-                if(tail->T = 0) pilha.push(tail);
+                //if(tail->T = 0) pilha.push(tail);
             }
             // * 2. Verifica se tem item na QUEUE e coloca em tail
             if(headQueue->next != NULL) headQueue->toProcessor(headProc);
