@@ -22,7 +22,6 @@ class Item{
                 tail = tail->next;
                 i++;
             }
-\
             if( i > 0 ){
                 this->next = temp->next;
                 tail->next = temp;
@@ -86,8 +85,7 @@ class Pilha{
         Item *newItem;
         newItem = new Item;
         newItem->X = tail->X;
-        newItem->T = tail->T
-
+        newItem->T = tail->T; 
         //while(){
 
         //}
