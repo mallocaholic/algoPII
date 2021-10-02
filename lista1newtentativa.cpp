@@ -13,11 +13,11 @@ class Item{
         int T; //Tempo de processamento
         Item *next;
 
-        // Item(int X, int T){
-        //     this->X = X;
-        //     this->T = T;
-        //     this->next = NULL;
-        // }
+        Item(int X, int T){
+            this->X = X;
+            this->T = T;
+            this->next = NULL;
+        }
 
         void cycle(){
             int i = 0;
@@ -37,14 +37,10 @@ class Item{
         
         void toProcessor(Item *headProc){
             
-            Item *newItem;
+            Item *newItem = new Item(this->next->X, this->next->T);
             Item *temp = this->next;
             Item *tail = headProc->next;
             
-            newItem = new Item;
-            newItem->T = this->next->T;
-            newItem->X = this->next->X;
-            newItem->next = NULL;
             //Colocando a queue pra frente
             if(temp->next != NULL)
             this->next = this->next->next;
@@ -62,11 +58,7 @@ class Item{
         };
 
         void toQueue(int idenItem, int procTimeItem){
-            Item *newItem;
-            newItem = new Item; // * Criando o novo item
-            newItem->X = idenItem;
-            newItem->T = procTimeItem;
-            newItem->next = NULL;
+            Item *newItem = new Item(idenItem, procTimeItem); // * Criando o novo item
 
             if(this->next == NULL) this->next = newItem; // * Se a lista está vazia, retorna o novo elemento.
             else {
@@ -85,16 +77,14 @@ class Pilha{
     public:
     int size;
     Item *topo;
+    Pilha(){
+        this->size = 0;
+        this->topo = NULL;
+    }
 
     void push(Item *tail){
         
-        Item *newItem;
-        newItem = new Item;
-        newItem->X = tail->X;
-        newItem->T = tail->T; 
-        //while(){
-
-        //}
+        Item *newItem = new Item(tail->X, tail->T);
     }
 };
 
@@ -106,18 +96,11 @@ int main(){
 
     string action = "";
 
-    Item *headProc = NULL,
-         *headQueue = NULL,
-         *tail;
+    Item *headProc = new Item(0, 0),
+         *headQueue = new Item(0, 0),
+         *tail = NULL;
 
-    Pilha pilha; 
-    pilha.size = 0;
-    pilha.topo = NULL;
-
-    headProc = new Item;
-    headProc->next = NULL;
-    headQueue = new Item;
-    headQueue->next = NULL;
+    Pilha *pilha = new Pilha();
 
     //Recebendo input
     cin >> procTime;
