@@ -82,9 +82,38 @@ class Pilha{
         this->topo = NULL;
     }
 
-    void push(Item *tail){
+    void push(Item *tail, Item *headProc){
+        Item *p = headProc;
+        int i = 0;    
+        //Item *newItem = new Item(tail->X, tail->T);
+        (this->size)++;
         
-        Item *newItem = new Item(tail->X, tail->T);
+        while(p->next != tail){ 
+            p = p->next;
+            i++;
+        }
+        
+        if(i>0){
+            tail->next = this->topo;
+            this->topo = tail;
+            p->next = NULL;
+        }
+    }
+
+    void pop(){
+        int X = this->topo->X;
+        Item *temp = this->topo;
+        
+        if( this->size > 1 ) {
+            this->topo = this->topo->next;
+            //delete temp;
+        }
+        else {
+            this->topo = NULL;
+            //delete temp;
+        }
+        cout << "UNLD " << X << endl;
+        (this->size)--;
     }
 };
 
@@ -113,23 +142,28 @@ int main(){
             headQueue->toQueue(idenItem, procTimeItem);
         // ! UNLD
         }else if( !action.compare(unload) ){
-
+            pilha->pop();
         // ! PROC
         }else if( !action.compare(processing) ){
-            tail = headProc->next;
+            tail = headProc->next; 
+            
             if(headProc->next != NULL){
                 if(tail->next != NULL ) while(tail->next != NULL) tail = tail->next;
             // * 1. Verifica se tem item processado em tail
-                //if(tail->T = 0) pilha.push(tail);
+                if(tail->T == 0) pilha->push(tail, headProc);
             }
             // * 2. Verifica se tem item na QUEUE e coloca em tail
             if(headQueue->next != NULL) headQueue->toProcessor(headProc);
+            flagQueue = 1;
             if(headProc->next != NULL){
+                
                 // * Trabalha no item
                 if(headProc->next->T - procTime > 0) headProc->next->T-=procTime;
                 else headProc->next->T = 0;
+                
                 // *
                 cout << "PROC " << headProc->next->X << " " << headProc->next->T << endl;
+            
             } else if (flagQueue == 1) cout << "PROC -1 -1" << endl;
             
             headProc->cycle(); //RODA
