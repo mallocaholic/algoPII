@@ -12,11 +12,13 @@ class Item{
         int X; //Identificador (0,1,2 etc)
         int T; //Tempo de processamento
         Item *next;
+        int size;
 
         Item(int X, int T){
             this->X = X;
             this->T = T;
             this->next = NULL;
+            this->size = 0;
         }
 
         void cycle(){
@@ -35,7 +37,7 @@ class Item{
             }
         };
         
-        void toProcessor(Item *headProc){
+        void toProc(Item *headProc){
             
             Item *newItem = new Item(this->next->X, this->next->T);
             Item *temp = this->next;
@@ -85,7 +87,6 @@ class Pilha{
     void push(Item *tail, Item *headProc){
         Item *p = headProc;
         int i = 0;    
-        //Item *newItem = new Item(tail->X, tail->T);
         (this->size)++;
         
         while(p->next != tail){ 
@@ -93,7 +94,7 @@ class Pilha{
             i++;
         }
         
-        if(i>0){
+        if(i>=0){
             tail->next = this->topo;
             this->topo = tail;
             p->next = NULL;
@@ -153,7 +154,7 @@ int main(){
                 if(tail->T == 0) pilha->push(tail, headProc);
             }
             // * 2. Verifica se tem item na QUEUE e coloca em tail
-            if(headQueue->next != NULL) headQueue->toProcessor(headProc);
+            if(headQueue->next != NULL) headQueue->toProc(headProc);
             flagQueue = 1;
             if(headProc->next != NULL){
                 
@@ -161,12 +162,14 @@ int main(){
                 if(headProc->next->T - procTime > 0) headProc->next->T-=procTime;
                 else headProc->next->T = 0;
                 
+                if(headProc->next->X == 102 && headProc->next->T == 0)
+                int x = 0;// DEBUGANDO 
                 // *
                 cout << "PROC " << headProc->next->X << " " << headProc->next->T << endl;
+                headProc->cycle(); //RODA
             
             } else if (flagQueue == 1) cout << "PROC -1 -1" << endl;
             
-            headProc->cycle(); //RODA
         }
         cin >> action;
     }    

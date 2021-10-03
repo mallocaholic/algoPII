@@ -15,8 +15,14 @@
   "C_Cpp_Runner.cppStandard": "",
   "C_Cpp_Runner.excludeSearch": [],
   "C_Cpp_Runner.enableWarnings": true,
-  "C_Cpp_Runner.warningsAsError": false,
-  "files.associations": {
-    "iostream": "cpp"
-  }
+"C_Cpp_Runner.warningsAsError": false,
+"files.exclude": {
+    "**/.vscode/": true,
+    ".vscode/launch.json": true,
+    "**/lista1newtentativa": true,
+    "**/a.out": true,
+    "**/teste2.cpp": true,
+    "**/.gitignore": true,
+    ".vscode/settings.json": true
+}
 }
