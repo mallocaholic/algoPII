@@ -3,8 +3,8 @@
 
 #define SPACE " "
 #define endl "\n"
-//Returning key 
-int key(std::string _name){
+
+int key(std::string _name){ // returning key 
     
     int key = 0;
     for(int i = 0; i < _name.length(); i++){
@@ -12,10 +12,10 @@ int key(std::string _name){
     }
 
     return key;
+    
 }
 
-// Defining song class
-class _song{
+class _song{ // defining song class
 
     public:
     int key, duration, lis_time;
@@ -53,36 +53,10 @@ class _song_hashtable{ // defining hastable class
         delete[] bucket;
     }
 
-    _song_hashtable *resize(){
 
-        factor = (float) ++size / (float) max_capacity;
+    void add(_song new_song, bool print_out){ // adding song to bucket
 
-        if(factor >= 50){
-            
-            max_capacity = 2*max_capacity + 1;
-            
-            _song_hashtable *new_hash = new _song_hashtable(max_capacity);
-            new_hash->size = size;
-
-            for(int i = 0; i < max_capacity; i++) // coppying data
-                new_hash->bucket[i] = bucket[i];
-
-            this->~_song_hashtable();
-
-            return new_hash;
-
-        } 
-        
-        else return this;
-
-    }
-
-    void add(std::string _name, int duration){ // adding song to bucket
-
-        _song new_song;
-        new_song.name = _name;
-        new_song.duration = duration;
-        new_song.key = key(_name) % max_capacity;
+        new_song.key = key(new_song.name) % max_capacity;
 
         while( bucket[new_song.key].key != -1 ){
             new_song.key++;
@@ -91,8 +65,8 @@ class _song_hashtable{ // defining hastable class
 
         bucket[new_song.key] = new_song;
 
-        std::cout << bucket[new_song.key].name << SPACE 
-                  << new_song.key << endl;
+        if(print_out == true) std::cout << bucket[new_song.key].name << SPACE 
+                                        << new_song.key << endl;
 
     }
 
@@ -126,6 +100,27 @@ class _song_hashtable{ // defining hastable class
 
     }
 
+    _song_hashtable *resize(){
+
+        factor = 100 * (float) ++size / (float) max_capacity;
+
+        if(factor >= 50.0f){
+            
+            _song_hashtable *new_hash = new _song_hashtable(2*max_capacity+1);
+            new_hash->size = size;
+
+            for(int i = 0; i < max_capacity; i++) // coppying data
+                if(bucket[i].key != -1) new_hash->add(bucket[i], false);
+            
+            delete this;
+            return new_hash;
+
+        } 
+        
+        else return this;
+
+    }
+
 };
 
 int main(){
@@ -141,10 +136,11 @@ int main(){
     while( action != "END" ){
         
         if( action == "ADD" ){
-
-            std::cin >> name >> duration;
-            hash->add(name, duration);
-            hash->resize();
+            _song new_song;
+            std::cin >> new_song.name >> new_song.duration;
+            
+            hash->add(new_song, true);
+            hash = hash->resize();
 
         }
         else if( action == "PLAY" ){
