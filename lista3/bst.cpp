@@ -1,58 +1,64 @@
 #include <iostream> 
-
+#define spc " "
 class Node {
     public:
     Node *right, *left;
-    int h, bf, value;
+    int value;
 
-    explicit Node(const int &x) : right(nullptr), left(nullptr), h(0), bf(0){
+    explicit Node(const int &x) : right(nullptr), left(nullptr){
         value = x;
     };
 
     Node *rotateLeft(){
-
-        Node *rR = right;
-        Node *rL = rR->left;
+        if(right == nullptr) return this;
+        Node *R = right;
+        Node *rL = R->left;
         right = rL;
-        rR->left = this;
-        return rR;
+        R->left = this;
+        return R;
     }
+
+    Node *rotateRight(){
+        if(left == nullptr) return this;
+        Node *L = left;
+        Node *lR = L->right;
+        left = lR;
+        L->right = this;
+        return L;
+    }
+
+    void print(){
+        if(this->left != nullptr) left->print();
+        if(this->right != nullptr) right->print();
+        std::cout << this->value << spc;
+    }
+
 };
 
-// Node *E_to_T(Node *root){ 
-    // if(root->left != nullptr) 
-    // if(root->left->right != nullptr){ 
-        // root->left = E_to_T(root->left->rotateLeft()); 
-    // } 
-    // else if (root->left != nullptr) 
-        // root = E_to_T(root->left); 
-    // return root;
-// }
+Node *leftSpine(Node *root){
+    if(root == nullptr) return root;
 
-bool shouldRotate(Node *root){
-    if(root->right != nullptr) return true;
-    else return false;
+    if(root->left == nullptr) return root;
+
+    if(root->right != nullptr) root = leftSpine(root->rotateLeft());
+    else if(root->left != nullptr) root->left = leftSpine(root->left);
+
+
+    return root;
 }
 
-Node *E_to_T(Node *root, Node *saveFirstRoot, bool isSaved){
+Node *rightSpine(Node *root){
+    if(root == nullptr) return root;
 
-    if(isSaved == false) saveFirstRoot = root;
-    std::cout << "OK!";
-    if(root->right != nullptr){
+    if(root->right == nullptr) return root;
 
-        root = root->rotateLeft();
-        E_to_T(root, saveFirstRoot, isSaved);
+    if(root->left != nullptr) root = rightSpine(root->rotateRight());
+    else if(root->right != nullptr) root->right = rightSpine(root->right);
 
-    } else if (root->left != nullptr){
 
-        if( root->left->right != nullptr )
-            root->left = root->left->rotateLeft();
-        E_to_T(root->left, saveFirstRoot, true);
-
-    }
-    
-    else return saveFirstRoot;
+    return root;
 }
+
 
 Node *insert(Node *root, int x){
 
@@ -69,20 +75,68 @@ Node *insert(Node *root, int x){
     return root;
 }
 
-Node *createPreOrder(int arr[], int i, int j){
+Node *checkLeft(int x, Node *root){
+    //First we gonna to do right rotations until we get the first root right
+    if (root->value == x)
+        return root;
+    else
+        return checkLeft(x, root->rotateRight());
+}
 
-    if(i > j) return nullptr;
-    
-    Node *newNode = new Node(arr[i]);
+Node *checkRight(int x, Node *root){
+    if (root->value == x)
+        return root;
+    else
+        return checkRight(x, root->rotateLeft());
 
-    int p = i+1;
-    while( p <= j && arr[p] <= newNode->value)
-        p++;
+    return root; //coloquei depois
+}
 
-    newNode->left = createPreOrder(arr, i + 1, i - 1);
-    newNode->right = createPreOrder(arr, i, j);
+int *getPath(Node *root, int tam, int value){
+    int *paths = new int[tam];
+    int i = 0;
 
-    return newNode;
+    while(root->value != value)
+        if(root->right != nullptr && value > root->value){
+            root = root->right;
+            paths[i++] = true;
+            std::cout << "Foi para direita! ";
+        } 
+        else if(root->left != nullptr){
+            root = root->left;
+            paths[i++] = false;
+            std::cout << "Foi para esquerda! ";
+        }
+
+    paths[i] = -1; 
+    return paths;
+}
+
+Node *E_to_T(int arr[], int min, int max, int *preIndex, Node *root, int vetTam){
+
+    if(root->value = arr[min]) return root;
+
+	if (*preIndex >= vetTam || min > max)
+		return nullptr;
+
+    if(root == nullptr) return nullptr;
+
+    int *paths = getPath(root, max, arr[min]);
+
+	*preIndex = *preIndex + 1;
+
+	if (min == max)
+		return root;
+
+	int i;
+	for ( i = min; i <= max; ++i )
+		if ( arr[ i ] > root->value )
+			break;
+
+	root->left = E_to_T(arr, *preIndex, i - 1, preIndex, root, vetTam);
+	root->right = E_to_T(arr, i, max, preIndex, root, vetTam);
+
+    return root;
 }
 
 int main()
@@ -93,26 +147,30 @@ int main()
     Node *rootT = nullptr;
     std::cin >> N;
 
-    /*for (int i = 0; i < N; i++){
+    for (int i = 0; i < N; i++){
         int x;
         std::cin >> x;
         rootS = insert(rootS, x);
-    }*/
-
+    }
+    /*
+    */
     int value[N];
     for (int i = 0; i < N; i++){
         std::cin >> value[i];
     }
-    rootT = createPreOrder(value, 0, N-1);
+    // rootT = createPreOrder(value, 0, N-1);*/
 
+    int pre = 0;
+    // Node *result = rootS->search(4);
+    //rootS = leftSpine(rootS);
+    rootS = E_to_T(value, 0, N-1, &pre, rootS, N-1);
+    rootS->print();
+    std::cout << std::endl;
 
-
-    printf("Done bro");
-    //rootS = E_to_T(rootS, rootS, false);
-    // int value[N];
-    // for( i = 0; i < N-1; i++)
-    //     std::cin >> value[i];
-    // rootT = createPreOrder(value, 0, N);    
+    //int value[N];
+    //for( i = 0; i < N-1; i++)
+    //    std::cin >> value[i];
+    //rootT = createPreOrder(value, 0, N);    
 
     return 0;
 }
