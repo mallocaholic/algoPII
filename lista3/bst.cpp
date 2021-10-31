@@ -35,14 +35,14 @@ class Node {
 
 };
 
-Node *leftSpine(Node *root){
+Node *leftSpine(Node *root, int *nLeft){
     if(root == nullptr) return root;
 
-    if(root->left == nullptr) return root;
-
-    if(root->right != nullptr) root = leftSpine(root->rotateLeft());
-    else if(root->left != nullptr) root->left = leftSpine(root->left);
-
+    if(root->right != nullptr){ 
+        root = leftSpine(root->rotateLeft(), nLeft);
+        (*nLeft)++;
+    }
+    else root->left = leftSpine(root->left, nLeft);
 
     return root;
 }
@@ -50,10 +50,8 @@ Node *leftSpine(Node *root){
 Node *rightSpine(Node *root){
     if(root == nullptr) return root;
 
-    if(root->right == nullptr) return root;
-
     if(root->left != nullptr) root = rightSpine(root->rotateRight());
-    else if(root->right != nullptr) root->right = rightSpine(root->right);
+    else root->right = rightSpine(root->right);
 
 
     return root;
@@ -75,27 +73,28 @@ Node *insert(Node *root, int x){
     return root;
 }
 
-Node *checkLeft(int x, Node *root){
+Node *checkLeft(int x, Node *root, int *nRight){
     //First we gonna to do right rotations until we get the first root right
     if (root->value == x)
         return root;
-    else
-        return checkLeft(x, root->rotateRight());
+    else{
+        (*nRight)++;
+        return checkLeft(x, root->rotateRight(), nRight);
+    }
 }
 
-Node *checkRight(int x, Node *root){
+Node *checkRight(int x, Node *root, int *nLeft){
     if (root->value == x)
         return root;
-    else
-        return checkRight(x, root->rotateLeft());
-
-    return root; //coloquei depois
+    else{
+        (*nLeft)++;
+        return checkRight(x, root->rotateLeft(), nLeft);
+    }
 }
 
-int *getPath(Node *root, int tam, int value){
-    int *paths = new int[tam];
+void getPath(Node *root, int tam, int value, int paths[]){
     int i = 0;
-
+    if(root->value == value) paths[0] = -1;
     while(root->value != value)
         if(root->right != nullptr && value > root->value){
             root = root->right;
@@ -109,19 +108,22 @@ int *getPath(Node *root, int tam, int value){
         }
 
     paths[i] = -1; 
-    return paths;
 }
 
-Node *E_to_T(int arr[], int min, int max, int *preIndex, Node *root, int vetTam){
+Node *E_to_T(int arr[], int min, int max, int *preIndex, Node *root, int vetTam, Node *firstRoot, bool isRight, int *nRight, int *nLeft){
 
-    if(root->value = arr[min]) return root;
+	if (*preIndex >= vetTam || min > max || root == nullptr)
+		return root;
 
-	if (*preIndex >= vetTam || min > max)
-		return nullptr;
+    if(root->value != arr[min]) 
+    {
+        if(isRight == true) root = checkRight(arr[min], root, nLeft);
+        else root = checkLeft(arr[min], root, nRight);
 
-    if(root == nullptr) return nullptr;
-
-    int *paths = getPath(root, max, arr[min]);
+        if(min == 0 && arr[0] == root->value) firstRoot = root;
+        // *preIndex = 0;
+        return E_to_T(arr, min, max, preIndex, root, vetTam, firstRoot, isRight, nRight, nLeft);    
+    }
 
 	*preIndex = *preIndex + 1;
 
@@ -133,8 +135,8 @@ Node *E_to_T(int arr[], int min, int max, int *preIndex, Node *root, int vetTam)
 		if ( arr[ i ] > root->value )
 			break;
 
-	root->left = E_to_T(arr, *preIndex, i - 1, preIndex, root, vetTam);
-	root->right = E_to_T(arr, i, max, preIndex, root, vetTam);
+	root->left = E_to_T(arr, *preIndex, i - 1, preIndex, root->left, vetTam, firstRoot, false, nRight, nLeft);
+	root->right = E_to_T(arr, i, max, preIndex, root->right, vetTam, firstRoot, true, nRight, nLeft);
 
     return root;
 }
@@ -152,25 +154,18 @@ int main()
         std::cin >> x;
         rootS = insert(rootS, x);
     }
-    /*
-    */
+
     int value[N];
     for (int i = 0; i < N; i++){
         std::cin >> value[i];
     }
-    // rootT = createPreOrder(value, 0, N-1);*/
 
-    int pre = 0;
-    // Node *result = rootS->search(4);
-    //rootS = leftSpine(rootS);
-    rootS = E_to_T(value, 0, N-1, &pre, rootS, N-1);
+    int pre = 0, nLeft = 0, nRight = 0;
+    i = 0;
+    rootS = leftSpine(rootS, &nLeft);
+    rootS = E_to_T(value, 0, N-1, &pre, rootS, N-1, rootS, false, &nRight, &nLeft);
     rootS->print();
     std::cout << std::endl;
-
-    //int value[N];
-    //for( i = 0; i < N-1; i++)
-    //    std::cin >> value[i];
-    //rootT = createPreOrder(value, 0, N);    
 
     return 0;
 }
