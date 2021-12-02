@@ -1,11 +1,13 @@
-#include <iostream> 
+#include <iostream>
+#include <string> 
 #define spc " "
+#define jump std::cout << std::endl
 class Node {
     public:
     Node *right, *left;
-    int value;
+    int value, h, bf;
 
-    explicit Node(const int &x) : right(nullptr), left(nullptr){
+    explicit Node(const int &x) : right(nullptr), left(nullptr), h(0){
         value = x;
     };
 
@@ -27,12 +29,17 @@ class Node {
         return L;
     }
 
-    void print(){
-        if(this->left != nullptr) left->print();
-        if(this->right != nullptr) right->print();
-        std::cout << this->value << spc;
-    }
+    void print(bool *isAVL, int x){
+        if(left != nullptr)
+            left->print(isAVL, x);
+        if(right != nullptr) 
+            right->print(isAVL, x);
+        // checar balanceamento
+        if(abs(bf) > 1) *isAVL = false;
 
+        if(value != x) std::cout << value << spc;
+        else std::cout << value;
+    }
 };
 
 Node *leftSpine(Node *root, int *nLeft){
@@ -46,17 +53,6 @@ Node *leftSpine(Node *root, int *nLeft){
 
     return root;
 }
-
-Node *rightSpine(Node *root){
-    if(root == nullptr) return root;
-
-    if(root->left != nullptr) root = rightSpine(root->rotateRight());
-    else root->right = rightSpine(root->right);
-
-
-    return root;
-}
-
 
 Node *insert(Node *root, int x){
 
@@ -92,27 +88,29 @@ Node *checkRight(int x, Node *root, int *nLeft){
     }
 }
 
-void getPath(Node *root, int tam, int value, int paths[]){
-    int i = 0;
-    if(root->value == value) paths[0] = -1;
-    while(root->value != value)
-        if(root->right != nullptr && value > root->value){
-            root = root->right;
-            paths[i++] = true;
-            std::cout << "Foi para direita! ";
-        } 
-        else if(root->left != nullptr){
-            root = root->left;
-            paths[i++] = false;
-            std::cout << "Foi para esquerda! ";
-        }
-
-    paths[i] = -1; 
+int max(int x, int y){
+    if(x >= y) return x;
+    else return y;
 }
 
-Node *E_to_T(int arr[], int min, int max, int *preIndex, Node *root, int vetTam, Node *firstRoot, bool isRight, int *nRight, int *nLeft){
+int getH(Node *root){
+    if(root == nullptr) return 0;
+ 
+    root->h = 1 + max(getH(root->right), getH(root->left));
 
-	if (*preIndex >= vetTam || min > max || root == nullptr)
+    if(root->h == 1) root->bf = 0;
+    else if(root->right != nullptr || root->left != nullptr){
+        if(root->right == nullptr) root->bf = -(root->left->h);
+        else if(root->left == nullptr) root->bf = root->right->h; 
+        else root->bf = root->right->h - root->left->h;
+    }
+
+    return root->h;
+}
+
+Node *E_to_T(int arr[], int min, int max, int *index, Node *root, int vetTam, Node *firstRoot, bool isRight, int *nRight, int *nLeft){
+
+	if (*index >= vetTam || min > max || root == nullptr)
 		return root;
 
     if(root->value != arr[min]) 
@@ -121,11 +119,11 @@ Node *E_to_T(int arr[], int min, int max, int *preIndex, Node *root, int vetTam,
         else root = checkLeft(arr[min], root, nRight);
 
         if(min == 0 && arr[0] == root->value) firstRoot = root;
-        // *preIndex = 0;
-        return E_to_T(arr, min, max, preIndex, root, vetTam, firstRoot, isRight, nRight, nLeft);    
+        // *index = 0;
+        return E_to_T(arr, min, max, index, root, vetTam, firstRoot, isRight, nRight, nLeft);    
     }
 
-	*preIndex = *preIndex + 1;
+	*index = *index + 1;
 
 	if (min == max)
 		return root;
@@ -135,37 +133,53 @@ Node *E_to_T(int arr[], int min, int max, int *preIndex, Node *root, int vetTam,
 		if ( arr[ i ] > root->value )
 			break;
 
-	root->left = E_to_T(arr, *preIndex, i - 1, preIndex, root->left, vetTam, firstRoot, false, nRight, nLeft);
-	root->right = E_to_T(arr, i, max, preIndex, root->right, vetTam, firstRoot, true, nRight, nLeft);
+	root->left = E_to_T(arr, *index, i - 1, index, root->left, vetTam, firstRoot, false, nRight, nLeft);
+	root->right = E_to_T(arr, i, max, index, root->right, vetTam, firstRoot, true, nRight, nLeft);
 
     return root;
 }
 
 int main()
 {
+    std::string l;
+    int N;
 
-    int N, i, j;
-    Node *rootS = nullptr; 
-    Node *rootT = nullptr;
-    std::cin >> N;
+    while ( std::cin >> N ){
 
-    for (int i = 0; i < N; i++){
-        int x;
-        std::cin >> x;
-        rootS = insert(rootS, x);
+        int i, j;
+        Node *rootS = nullptr; 
+        Node *rootT = nullptr;
+
+        for (int i = 0; i < N; i++){
+            int x;
+            std::cin >> x;
+            rootS = insert(rootS, x);
+        }
+
+        int value[N];
+        for (int i = 0; i < N; i++){
+            std::cin >> value[i];
+        }
+
+
+        int pre = 0, nLeft = 0, nRight = 0;
+        bool isAVL = true;
+        i = 0;
+
+        rootS = leftSpine(rootS, &nLeft);
+        rootS = E_to_T(value, 0, N - 1, &pre, rootS, N - 1, rootS, false, &nRight, &nLeft);
+        rootS->h = getH(rootS);
+
+        std::cout << nLeft << spc << nRight << std::endl;
+        rootS->print(&isAVL, value[0]);
+        jump;
+        if (isAVL == true)
+            std::cout << "true" << std::endl;
+        else
+            std::cout << "false" << std::endl;
+        jump;
+
     }
-
-    int value[N];
-    for (int i = 0; i < N; i++){
-        std::cin >> value[i];
-    }
-
-    int pre = 0, nLeft = 0, nRight = 0;
-    i = 0;
-    rootS = leftSpine(rootS, &nLeft);
-    rootS = E_to_T(value, 0, N-1, &pre, rootS, N-1, rootS, false, &nRight, &nLeft);
-    rootS->print();
-    std::cout << std::endl;
 
     return 0;
 }

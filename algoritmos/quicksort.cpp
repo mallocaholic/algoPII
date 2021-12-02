@@ -10,10 +10,11 @@ void swap(int arr[], int x, int y){
 
 }
 
-int partition(int arr[], int p, int r){
+int partition(int arr[], int p, int r, int size){
 	int i = p-1, j;
-
 	for( j = p; j < r; j++ ){
+		
+		
 		if( arr[j] <= arr[r] ){
 			i++;
 			swap(arr[j], arr[i]);			
@@ -24,21 +25,27 @@ int partition(int arr[], int p, int r){
 	return i+1;	
 }
 
-void quicksort(int arr[], int p, int r){
+int quicksort(int arr[], int p, int r, int size){
 	if( p < r ){
-		int q = partition(arr, p, r);
-		quicksort(arr, p, q-1);
-		quicksort(arr, q+1, r);
+		int q = partition(arr, p, r, size);
+		for( int m = size-1; m > 0; m-- )
+			std::cout << arr[m] << " ";
+		std::cout << std::endl; 
+		quicksort(arr, p, q-1, size);
+		quicksort(arr, q+1, r, size);
 	}
-		for(int i = 0; i <= r; i++)
-			std::cout << arr[i] << " "; 
-	std::cout << std::endl;
+		// for(int i = 0; i <= r; i++)
+			// std::cout << arr[i] << " "; 
+	// std::cout << std::endl;
 }
 
 int main(){
 
-	int arr[] = {3, 1, 4, 6, 8 , 2, 10};
+	int n, D, num;
+	cin >> N >> D;
+
+	int arr[] = {6,4,0,3,8,5,2,7,1,9};
 	int size = sizeof(arr)/sizeof(arr[0]);
-	quicksort(arr, 0, size-1); 
+	quicksort(arr, 0, size-1, size); 
 	return 0;  
 }
