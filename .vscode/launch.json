@@ -8,7 +8,7 @@
       "program": "${fileDirname}/${fileBasenameNoExtension}",
       "args": [
         "<",
-        "${workspaceFolder}/lista6/1.in"
+        "${workspaceFolder}/lista6/2"
       ],
       "stopAtEntry": false,
       "cwd": "${fileDirname}",
